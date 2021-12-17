@@ -1,0 +1,7 @@
+---
+applications:
+  - name: tcc-univesp-2022
+    memory: 64M
+    buildpacks:
+    - staticfile_buildpack
+    Cache-Control: max-age=31536000
