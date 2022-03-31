@@ -7,16 +7,19 @@
     <img alt="Mumu" src="./assets/mumuSM.png">
     <img alt="Leo" src="./assets/leoSM.png">
     <Presentation msg="Esse é o nosso TCC"/>
+    <Query />
   </div>
 </template>
 
 <script>
 import Presentation from './components/Presentation.vue'
+import Query from './components/Query.vue'
 
 export default {
   name: 'App',
   components: {
-    Presentation
+    Presentation,
+    Query
   }
 }
 </script>
