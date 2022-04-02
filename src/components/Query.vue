@@ -1,9 +1,10 @@
 <template>
     <div>
-        <button @click="pressed = true">inicio</button>
+        <button @click="pressed = true; choosen = false">inicio</button>
         <div v-if="pressed">
           <ul id="example-1">
             <li v-for="info in infos" :key="info.id">
+                <img :src="info.urlFoto" alt="" width="35" height="50">
               <button @click="selected(info.id)">
                 {{ info.nome }} - {{ info.siglaPartido }}
               </button>
@@ -11,7 +12,51 @@
           </ul>
         </div>
         <div v-if="choosen">
-          <a href="">{{ details }}</a>
+          <ul id="example-1" style="display: grid">
+            <li>
+              <img :src="details.ultimoStatus.urlFoto" alt="">
+            </li>
+            <li >
+                Nome: {{ details.nomeCivil }}
+            </li>
+            <li >
+                Natural de: {{ details.municipioNascimento }} - {{ details.ufNascimento }}
+            </li>
+            <li >
+                Data de Nascimento: {{ details.dataNascimento }}
+            </li>
+            <li >
+                Escolaridade: {{ details.escolaridade }}
+            </li>
+            <li >
+                Situação: {{ details.ultimoStatus.situacao }}
+            </li>
+            <li >
+                Email: {{ details.ultimoStatus.email }}
+            </li>
+          </ul>
+          <ul id="example-1" >
+            <li >
+              <button>
+                Despesas
+              </button>
+            </li>
+            <li >
+              <button>
+                Orgãos
+              </button>
+            </li>
+            <li >
+              <button>
+                Frentes
+              </button>
+            </li>
+            <li >
+              <button>
+                Ocupações
+              </button>
+            </li>
+          </ul>
         </div>
     </div>
 </template>
@@ -27,11 +72,9 @@ export default {
     selected(id) {
       this.pressed = false;
       axios.get(`https://dadosabertos.camara.leg.br/api/v2/deputados/${id}`).then(res => (
-        this.details = res,
+        this.details = res.data.dados,
         this.choosen = true
       ))
-
-      console.log("Olá");
     }
   },
   data() {
@@ -65,5 +108,9 @@ li {
 }
 a {
   color: #42b983;
+}
+button {
+  color: #ffffff;
+  background-color: #2b2be4;
 }
 </style>
