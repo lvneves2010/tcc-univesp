@@ -1,10 +1,9 @@
-
-import csv
+import sqlite3
 from requests import get
 from datetime import datetime, timedelta, date
 from typing import List, Optional, Tuple, Union, Any, Dict
-from numpy import array, zeros, nanmean, nanstd, NaN
-import sqlite3
+from numpy import zeros
+
 
 ################################ Funções  ################################
 
@@ -243,7 +242,7 @@ def gerar_base_dados_proposicoes() -> None:
         conexao_db.close()
 
 
-def buscar_votos(ids):
+def buscar_votos(ids) -> None:
     try:
         #Conectar banco de dados
         conexao_db = sqlite3.connect('/home/henrique/Downloads/banco_dados.db', timeout=15)
@@ -306,7 +305,7 @@ def split_list(alist, wanted_parts=1):
              for i in range(wanted_parts) ]
 
 
-def gerar_base_dados_votos() -> None:
+def gerar_lista_ids_votos() -> List[str]:
 
     try:
         conexao_db2 = sqlite3.connect('/home/henrique/Downloads/banco_dados.db')
@@ -477,3 +476,32 @@ def gerar_base_dados_proposicoesDeputados() -> None:
     finally:
         conexao_db.commit()
         conexao_db.close()
+
+
+
+if __name__ == '__main__':
+
+    print('Atualizando base de dados de deputados ...')
+    gerar_base_dados_deputados()
+
+    print('Atualizando base de dados de despesas ...')
+    gerar_base_dados_despesas()
+
+    print('Atualizando base de dados de votacoes ...')
+    gerar_base_dados_votacoes()
+
+    print('Atualizando base de dados votos de cada deputado ...')
+    buscar_votos(gerar_lista_ids_votos())
+
+    print('Atualizando base de dados de proposicoes ...')
+    gerar_base_dados_proposicoes()
+
+    print('Atualizando temas das proposicoes ...')
+    gerar_base_dados_proposicoes_add_tema()
+
+    print('Atualizando base de dados proposicoes de cada deputado ...')
+    gerar_base_dados_proposicoesDeputados()
+
+    
+
+

@@ -1,31 +1,29 @@
 
-from requests import get
-from datetime import datetime, timedelta, date
-from os import environ
-from functools import wraps
-from typing import Dict, List, Optional, Tuple, Union
-from flask import Flask, redirect, url_for, request, abort, make_response, jsonify, Response, render_template, g, abort
-from numpy import array, zeros, nanmean, nanstd, NaN
 import sqlite3
+from logging import basicConfig, FileHandler, info, warning, error, debug
+from datetime import datetime
+from os import environ
+from typing import Dict, List, Optional, Tuple, Union
+from flask import Flask, request, make_response, jsonify, Response
 
 ############################## Inicialização #############################
+
 
 #Configuração do Flask
 versao_app='1.0.0'
 app = Flask(__name__)
-app.secret_key = 'app_api'
-#app.secret_key = os.environ['SECRETKEY']
+app.secret_key = environ['SECRETKEY']
+
+#Logger
+basicConfig(handlers=[FileHandler(filename='server.log', encoding='utf-8', mode='a+')], level=int(environ['LOGLEVEL']), format='[%(asctime)s][%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 
 
 ################################ Funções  ################################
 
-def zero_to_nan(y):
-    x = array(y)
-    x[x == 0] = NaN
-    return x
 
 def banco_dados():
     return sqlite3.connect('/home/henrique/Downloads/banco_dados.db')
+
 
 def consultar_banco_dados(consulta:str, unico=False) -> Optional[List[Dict[str,str]]]:
     try:
@@ -43,6 +41,22 @@ def consultar_banco_dados(consulta:str, unico=False) -> Optional[List[Dict[str,s
         cursor.connection.close()
 
 
+def alterar_banco_dados(comando) -> bool:
+    try:
+        conexao = banco_dados()
+        cursor = conexao.cursor()
+        cursor.execute(comando)
+        conexao.commit()
+        return True
+
+    except Exception as e:
+        return False
+
+    finally:
+        conexao.commit()
+        conexao.close()
+
+
 ################################### Rotas #################################
 
 
@@ -57,16 +71,19 @@ def deputado() -> Response:
     
     if id is None:
         deputado = consultar_banco_dados('SELECT id, nome, partido, url_foto FROM identificacao WHERE legislatura_atual=1')
+        info(f'Consultado informações do deputado (id {id})')
     else:
         try:
             id=int(id)
         except:
             return make_response(jsonify({'erro': 'Id não reconhecido'}), 400)
         deputado = consultar_banco_dados(f'SELECT id, nome, partido, url_foto FROM identificacao WHERE legislatura_atual=1 and id={id}')
+        info(f'Consultado informações de todos os deputados')
     
     if deputado is None: return make_response(jsonify({'erro': 'Não foi possível recuperar as informações'}), 500)
     
     dados_resposta = {'dados': deputado}
+
     return make_response(jsonify(dados_resposta), 200)
 
 
@@ -116,6 +133,7 @@ def despesas_deputado(id:str) -> Response:
         }
     }
 
+    info(f'Consultado despesas do deputado (id {id})')
     return make_response(jsonify(dados_resposta), 200)
 
 
@@ -127,13 +145,84 @@ def proposicoes_deputado(id:str) -> Response:
                                         "INNER JOIN proposicoesDeputado ON proposicoesDeputado.id_proposicao = proposicoes.id "
                                         "INNER JOIN identificacao ON identificacao.id = proposicoesDeputado.id_deputado "
                                         f"WHERE proposicoesDeputado.id_deputado='{id}'")
-    if not proposicoes: make_response(jsonify({'erro': 'Não foi possível recuperar as informações'}), 500)
+    if not proposicoes: return make_response(jsonify({'erro': 'Não foi possível recuperar as informações'}), 500)
 
     dados_resposta = {
         'dados': proposicoes
     }
 
+    info(f'Consultado proposições do deputado (id {id})')
     return make_response(jsonify(dados_resposta), 200)
+
+
+@app.route('/deputado/<id>/votacoes/', methods=['GET'])
+def votacoes_deputado(id:str) -> Response:  
+
+    todas_votacoes = request.args.get('todasVotacoes') 
+
+    if todas_votacoes is None: 
+        #Recuperar votacoes do deputado apenas do mês atual
+        mes_atual = datetime.now().month 
+        votacoes = consultar_banco_dados("SELECT proposicoes.tema, proposicoes.siglaTipo, proposicoes.numero, "
+                                        "votacoes.data, votacoes.descricao, votos.voto, identificacao.nome FROM votos "
+                                        "INNER JOIN identificacao ON identificacao.id = votos.id_deputado "
+                                        "INNER JOIN votacoes ON votacoes.id = votos.id_votacao "
+                                        "INNER JOIN proposicoes ON proposicoes.id = votacoes.id_proposicao "
+                                        "WHERE DATE(substr(votacoes.data,7,4) "
+                                        "||'-' "
+                                        "||substr(votacoes.data,4,2) "
+                                        "||'-' "
+                                        "||substr(votacoes.data,1,2)) "
+                                        f"BETWEEN DATE('2022-{mes_atual:02d}-01') AND DATE('2022-{mes_atual:02d}-31') and identificacao.id = '{id}' ORDER BY votacoes.data ASC")
+    else:
+        #Recuperar todas as votações do deputado
+        votacoes = consultar_banco_dados("SELECT proposicoes.tema, proposicoes.siglaTipo, proposicoes.numero, "
+                                        "votacoes.data, votacoes.descricao, votos.voto, identificacao.nome FROM votos "
+                                        "INNER JOIN identificacao ON identificacao.id = votos.id_deputado "
+                                        "INNER JOIN votacoes ON votacoes.id = votos.id_votacao "
+                                        "INNER JOIN proposicoes ON proposicoes.id = votacoes.id_proposicao "
+                                        f"WHERE identificacao.id = '{id}' ORDER BY votacoes.data ASC")
+    
+    if not votacoes: return make_response(jsonify({'erro': 'Não foi possível recuperar as informações'}), 500)
+
+    dados_resposta = {
+        'dados': votacoes
+    }
+    info(f'Consultado votações do deputado (id {id})')
+    return make_response(jsonify(dados_resposta), 200)
+
+
+@app.route('/favorito', methods=['POST', 'DELETE'])
+def favorito() -> Response:
+
+    #Validar entradas
+    email = request.args.get('email')   
+    id_deputado = request.args.get('idDeputado') 
+
+    if not email or not id_deputado:
+        return make_response(jsonify({'erro': 'E-mail e/ou ID do deputado faltante'}), 400)
+
+    #Verificar se o ID do deputado existe
+    informacoes_deputado = consultar_banco_dados(f"SELECT * FROM identificacao WHERE id={id_deputado}", unico=True)
+    if not informacoes_deputado: return make_response(jsonify({'erro': 'ID de deputado inexistente'}), 400)
+
+    #Adicionar favorito
+    if request.method == 'POST':
+        acao='Adicionado'
+        sucesso = alterar_banco_dados(f"INSERT OR IGNORE INTO favoritos (email_usuario, id_deputado) VALUES ('{email}', {id_deputado})")
+    
+    #Remover favorito
+    else:
+        acao='Removido'
+        sucesso = alterar_banco_dados(f"DELETE FROM favoritos WHERE email_usuario='{email}' and id_deputado={id_deputado}")
+
+    #Retornar mensagem ao usuário
+    if not sucesso:
+        return make_response(jsonify({'erro': 'Não foi possível modificar as informações'}), 500)
+    else:
+        info(f'{acao} cadastro do deputado (id {id_deputado}) {informacoes_deputado.get("nome")} como favorito para o e-mail {email}')
+        return make_response(jsonify({'dados': 'sucesso'}), 200)
+
 
 
 if __name__ == '__main__':
