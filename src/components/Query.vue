@@ -1,17 +1,18 @@
 <template>
     <div>
-        <button @click="pressed = true; choosen = false">inicio</button>
+        <!-- <button @click="pressed = true; choosen = false">inicio</button> -->
         <div v-if="pressed">
           <ul id="example-1">
-            <li v-for="info in infos" :key="info.id">
+            <li v-for="info in infos" :key="info.id" @click="selected(info.id)" class="unit">
                 <img :src="info.urlFoto" alt="" width="35" height="50">
               <button @click="selected(info.id)">
-                {{ info.nome }} - {{ info.siglaPartido }}
+                {{ info.nome }} ( {{ info.siglaPartido }} ) 
               </button>
             </li>
           </ul>
         </div>
         <div v-if="choosen">
+          <button @click="pressed = true; choosen = false">voltar</button>
           <ul id="example-1" style="display: grid">
             <li>
               <img :src="details.ultimoStatus.urlFoto" alt="">
@@ -74,15 +75,20 @@ export default {
       axios.get(`https://dadosabertos.camara.leg.br/api/v2/deputados/${id}`).then(res => (
         this.details = res.data.dados,
         this.choosen = true
-      ))
+      ));
+      axios.get(`https://dadosabertos.camara.leg.br/api/v2/deputados/${id}/despesas`).then(res => (
+        this.despesas = res.data.dados,
+        this.choosen = true
+      ));
     }
   },
   data() {
       return {
-          pressed: false,
+          pressed: true,
           choosen: false,
           infos: null,
-          details: null
+          details: null,
+          despesas: null
       }
   },
   mounted () {
@@ -110,7 +116,11 @@ a {
   color: #42b983;
 }
 button {
-  color: #ffffff;
-  background-color: #2b2be4;
+  color: #000000;
+  background-color:#ffffff;
+  cursor: pointer;
+}
+.unit {
+  cursor: pointer;
 }
 </style>
