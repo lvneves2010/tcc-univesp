@@ -4,58 +4,33 @@
         <div v-if="pressed">
           <ul id="example-1">
             <li v-for="info in infos" :key="info.id" @click="selected(info.id)" class="unit">
-                <img :src="info.urlFoto" alt="" width="35" height="50">
+                <img :src="info.urlFoto" alt="" width="40" height="50">
               <button @click="selected(info.id)">
-                {{ info.nome }} ( {{ info.siglaPartido }} ) 
+                {{ info.nome }} ( {{ info.siglaPartido }} / {{ info.siglaUf}} ) 
               </button>
             </li>
           </ul>
         </div>
+        <button v-if="choosen" @click="pressed = true; choosen = false">voltar</button>
         <div v-if="choosen">
-          <button @click="pressed = true; choosen = false">voltar</button>
-          <ul id="example-1" style="display: grid">
-            <li>
-              <img :src="details.ultimoStatus.urlFoto" alt="">
+          <div  style="display: inline-flex">
+            <div>
+              <img :src="details.ultimoStatus.urlFoto" alt="" width="64" height="80">
+            </div>
+            <div>
+                <p >{{ details.nomeCivil }}</p>
+                <p>{{ details.ultimoStatus.siglaPartido }} / {{ details.ultimoStatus.siglaUf}} - {{ details.ultimoStatus.email }}</p>
+            </div>
+          </div>
+          <ul  style="display: grid" >
+            <li class="tabs">
+              <Expenses />
             </li>
-            <li >
-                Nome: {{ details.nomeCivil }}
+            <li class="tabs">
+              <Votes />
             </li>
-            <li >
-                Natural de: {{ details.municipioNascimento }} - {{ details.ufNascimento }}
-            </li>
-            <li >
-                Data de Nascimento: {{ details.dataNascimento }}
-            </li>
-            <li >
-                Escolaridade: {{ details.escolaridade }}
-            </li>
-            <li >
-                Situação: {{ details.ultimoStatus.situacao }}
-            </li>
-            <li >
-                Email: {{ details.ultimoStatus.email }}
-            </li>
-          </ul>
-          <ul id="example-1" >
-            <li >
-              <button>
-                Despesas
-              </button>
-            </li>
-            <li >
-              <button>
-                Orgãos
-              </button>
-            </li>
-            <li >
-              <button>
-                Frentes
-              </button>
-            </li>
-            <li >
-              <button>
-                Ocupações
-              </button>
+            <li class="tabs">
+              <Propositions />
             </li>
           </ul>
         </div>
@@ -64,8 +39,16 @@
 
 <script>
 import axios from 'axios'
+import Expenses from './Expenses.vue'
+import Votes from './Votes.vue'
+import Propositions from './Propositions.vue'
 export default {
   name: 'Query',
+  components: {
+    Expenses,
+    Votes,
+    Propositions
+  },
   props: {
     msg: String
   },
@@ -122,5 +105,13 @@ button {
 }
 .unit {
   cursor: pointer;
+}
+img {
+  border: 0.5px solid #b0afaf;
+  border-radius: 50%;
+}
+.tabs {
+  border: 0.5px solid #b0afaf;
+  margin: 1rem;
 }
 </style>
