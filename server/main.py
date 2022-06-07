@@ -1,5 +1,7 @@
 
+
 import sqlite3
+from base64 import encodebytes
 from logging import basicConfig, FileHandler, info, warning, error, debug
 from datetime import datetime
 from os import environ
@@ -8,9 +10,13 @@ from flask import Flask, request, make_response, jsonify, Response
 
 ############################## Inicialização #############################
 
+# export SECRETKEY="ab7651a2-e66a-11ec-8fea-0242ac120002"
+# export LOGLEVEL=10
+# export DB_PATH="/home/henrique/Downloads/banco_dados.db"
+# export VERSAO="1.0.0"
 
 #Configuração do Flask
-versao_app='1.0.0'
+versao_app=environ['VERSAO']
 app = Flask(__name__)
 app.secret_key = environ['SECRETKEY']
 
@@ -22,7 +28,8 @@ basicConfig(handlers=[FileHandler(filename='server.log', encoding='utf-8', mode=
 
 
 def banco_dados():
-    return sqlite3.connect('/home/henrique/Downloads/banco_dados.db')
+    #'/home/henrique/Downloads/banco_dados.db'
+    return sqlite3.connect(environ['DB_PATH'])
 
 
 def consultar_banco_dados(consulta:str, unico=False) -> Optional[List[Dict[str,str]]]:
@@ -35,6 +42,7 @@ def consultar_banco_dados(consulta:str, unico=False) -> Optional[List[Dict[str,s
         return (r[0] if r else None) if unico else r
 
     except Exception as e:
+        print(e)
         return None
 
     finally:
@@ -68,17 +76,49 @@ def versao() -> Response:
 @app.route('/deputado', methods=['GET'])
 def deputado() -> Response:
     id = request.args.get('id')
+    foto = request.args.get('foto')
+    limite = request.args.get('limite')
+
+    if limite is None: limite = 10
     
     if id is None:
-        deputado = consultar_banco_dados('SELECT id, nome, partido, url_foto FROM identificacao WHERE legislatura_atual=1')
-        info(f'Consultado informações do deputado (id {id})')
+        
+        deputado = consultar_banco_dados("SELECT identificacao.id, identificacao.nome, identificacao.partido, "
+                                        f"{'' if foto == '0' else 'identificacao.fotoBase64, '}"
+                                        "despesas.valor as despesa_mes FROM identificacao "
+                                        "INNER JOIN despesas ON despesas.id_deputado = identificacao.id "
+                                        "WHERE identificacao.legislatura_atual=1 AND "
+                                        "DATE(substr(despesas.data,7,4) "
+                                        "||'-' "
+                                        "||substr(despesas.data,4,2) "
+                                        "||'-' "
+                                        "||substr(despesas.data,1,2)) "
+                                        "BETWEEN DATE(strftime('%Y-%m', datetime('now')) || '-' || '01') AND "
+                                        "DATE(strftime('%Y-%m', datetime('now')) || '-' || '31')"
+                                        f"LIMIT {limite}")
+        info(f'Consultado informações de todos os deputados')
+        
     else:
         try:
             id=int(id)
         except:
             return make_response(jsonify({'erro': 'Id não reconhecido'}), 400)
-        deputado = consultar_banco_dados(f'SELECT id, nome, partido, url_foto FROM identificacao WHERE legislatura_atual=1 and id={id}')
-        info(f'Consultado informações de todos os deputados')
+        
+        deputado = consultar_banco_dados("SELECT identificacao.id, identificacao.nome, identificacao.partido, "
+                                        f"{'' if foto == '0' else 'identificacao.fotoBase64, '}"
+                                        "despesas.valor as despesa_mes FROM identificacao "
+                                        "INNER JOIN despesas ON despesas.id_deputado = identificacao.id "
+                                        "WHERE identificacao.legislatura_atual=1 AND "
+                                        f"identificacao.id = '{id}' AND "
+                                        "DATE(substr(despesas.data,7,4) "
+                                        "||'-' "
+                                        "||substr(despesas.data,4,2) "
+                                        "||'-' "
+                                        "||substr(despesas.data,1,2)) "
+                                        "BETWEEN DATE(strftime('%Y-%m', datetime('now')) || '-' || '01') AND "
+                                        "DATE(strftime('%Y-%m', datetime('now')) || '-' || '31')"
+                                        f"LIMIT {limite}")
+        info(f'Consultado informações do deputado (id {id})')
     
     if deputado is None: return make_response(jsonify({'erro': 'Não foi possível recuperar as informações'}), 500)
     
@@ -222,7 +262,6 @@ def favorito() -> Response:
     else:
         info(f'{acao} cadastro do deputado (id {id_deputado}) {informacoes_deputado.get("nome")} como favorito para o e-mail {email}')
         return make_response(jsonify({'dados': 'sucesso'}), 200)
-
 
 
 if __name__ == '__main__':

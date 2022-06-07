@@ -1,4 +1,6 @@
+
 import sqlite3
+from base64 import encodebytes
 from requests import get
 from datetime import datetime, timedelta, date
 from typing import List, Optional, Tuple, Union, Any, Dict
@@ -478,11 +480,69 @@ def gerar_base_dados_proposicoesDeputados() -> None:
         conexao_db.close()
 
 
+def gerar_base_dados_deputados_add_foto() -> None:
+
+    try:
+        #Conectar banco de dados
+        conexao_db = sqlite3.connect('/home/henrique/Downloads/banco_dados.db')
+        cursor = conexao_db.cursor()
+
+        #Recuperar url das fotos
+        cursor = cursor.execute("SELECT id, url_foto FROM identificacao WHERE foto is NULL")
+        fotos = cursor.fetchall()
+        
+        for idx, foto in enumerate(fotos):
+            #Buscar resultado
+            resposta = get(url=foto[1])
+            if resposta.status_code != 200 and resposta.status_code != 404: 
+                    print(resposta.status_code)
+                    return None
+            elif resposta.status_code == 404:
+                    continue
+
+            foto_bytes = resposta.content
+            cursor.execute(f"UPDATE identificacao SET foto=? WHERE id=? and foto IS NULL", [sqlite3.Binary(foto_bytes), foto[0]])
+            conexao_db.commit()
+            print(f'[{idx}] Ajustando foto deputado {foto[0]} ...' )
+
+
+    finally:
+        conexao_db.commit()
+        conexao_db.close()
+
+
+def gerar_base_dados_deputados_add_foto_base64() -> None:
+    try:
+        #Conectar banco de dados
+        conexao_db = sqlite3.connect('/home/henrique/Downloads/banco_dados.db')
+        cursor = conexao_db.cursor()
+
+        #Recuperar url das fotos
+        cursor = cursor.execute("SELECT id, foto FROM identificacao")
+        fotos = cursor.fetchall()
+        
+        for idx, foto in enumerate(fotos):
+            #Converter fotos
+            if foto[1]:
+                base64Foto = encodebytes(foto[1]).decode('ascii')
+            cursor.execute(f"UPDATE identificacao SET fotoBase64='{base64Foto}' WHERE id={foto[0]} and fotoBase64 IS NULL")
+            conexao_db.commit()
+            print(f'[{idx}] Ajustando foto deputado {foto[0]} ...' )
+
+    finally:
+        conexao_db.commit()
+        conexao_db.close() 
+
+
 
 if __name__ == '__main__':
 
     print('Atualizando base de dados de deputados ...')
     gerar_base_dados_deputados()
+
+    print('Atualizando base de dados fotos de cada deputado...')
+    gerar_base_dados_deputados_add_foto()
+    gerar_base_dados_deputados_add_foto_base64()
 
     print('Atualizando base de dados de despesas ...')
     gerar_base_dados_despesas()
