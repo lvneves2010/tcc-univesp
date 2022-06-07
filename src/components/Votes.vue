@@ -1,10 +1,10 @@
 <template>
     <div>
         <div v-if="expanded">
-            <p @click="expanded = false">Votações &#8679;</p>
+            <p @click="expanded = false">Votações &nbsp; &nbsp; &nbsp;  <a><img src="../assets/cima.png" alt="" width="10" height="10"></a></p>
         </div>
         <div v-else>
-            <p @click="expanded = true">Votações &#8681;</p>
+            <p @click="expanded = true">Votações &nbsp; &nbsp; &nbsp;  <a><img src="../assets/baixo.png" alt="" width="10" height="10"></a></p>
         </div>
         <div v-if="expanded">
             <p @click="expanded = false">Fechar</p>
