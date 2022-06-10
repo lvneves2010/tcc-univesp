@@ -5,6 +5,7 @@ from requests import get
 from datetime import datetime, timedelta, date
 from typing import List, Optional, Tuple, Union, Any, Dict
 from numpy import zeros
+from scipy.fft import idstn
 
 
 ################################ Funções  ################################
@@ -178,10 +179,12 @@ def gerar_base_dados_deputados() -> None:
                     partido_deputado = resposta_info_deputado.get('dados').get('ultimoStatus').get('siglaPartido').replace('\'','')
                     legislatura_atual = True if resposta_info_deputado.get('dados').get('ultimoStatus').get('idLegislatura') == legislatura_atual else False
                     url_foto = resposta_info_deputado.get('dados').get('ultimoStatus').get('urlFoto')
+                    partido_uf=resposta_info_deputado.get('dados').get('ultimoStatus').get('siglaUf')
+                    email=resposta_info_deputado.get('dados').get('ultimoStatus').get('email')
 
-                    cursor.execute(f"INSERT OR IGNORE INTO identificacao (id, nome, partido, legislatura_atual, url_foto) \
+                    cursor.execute(f"INSERT OR IGNORE INTO identificacao (id, nome, partido, legislatura_atual, url_foto, partido_uf, email) \
                         VALUES ({id_deputado},'{nome_deputado}','{partido_deputado}', \
-                                {legislatura_atual}, '{url_foto}')")
+                                {legislatura_atual}, '{url_foto}', '{partido_uf}', '{email}')")
 
                     conexao_db.commit()
 
@@ -480,7 +483,7 @@ def gerar_base_dados_proposicoesDeputados() -> None:
         conexao_db.close()
 
 
-def gerar_base_dados_deputados_add_foto() -> None:
+def gerar_base_dados_deputados_add_foto_bytes() -> None:
 
     try:
         #Conectar banco de dados
@@ -534,6 +537,43 @@ def gerar_base_dados_deputados_add_foto_base64() -> None:
         conexao_db.close() 
 
 
+def gerar_base_dados_deputados_ajuste2() -> None:
+    try:
+        #Conectar banco de dados
+        conexao_db = sqlite3.connect('/home/henrique/Downloads/banco_dados.db')
+        cursor = conexao_db.cursor()
+
+        #Recuperar url das fotos
+        cursor = cursor.execute("SELECT id FROM identificacao WHERE partido_uf IS NULL or email IS NULL")
+        ids = cursor.fetchall()
+        
+        for idx, id in enumerate(ids):
+            id = id[0]
+            print(f'[{idx}] Buscando info adicionais para deputado {id} ...')
+            #Buscar resultado
+            resposta = get(url=f'https://dadosabertos.camara.leg.br/api/v2/deputados/{id}')       
+            if resposta.status_code != 200 and resposta.status_code != 404: 
+                print(resposta.status_code)
+                return None
+            elif resposta.status_code == 404:
+                print(resposta.json())
+                return None
+
+            resposta = resposta.json()
+            resposta = resposta.get('dados')
+
+            partido_uf=resposta.get('ultimoStatus').get('siglaUf')
+            email=resposta.get('ultimoStatus').get('email')
+
+            cursor.execute(f"UPDATE identificacao SET partido_uf='{partido_uf}' WHERE id={id}")
+            cursor.execute(f"UPDATE identificacao SET email='{email}' WHERE id={id}")
+            conexao_db.commit()
+
+
+    finally:
+        conexao_db.commit()
+        conexao_db.close() 
+
 
 if __name__ == '__main__':
 
@@ -541,7 +581,7 @@ if __name__ == '__main__':
     gerar_base_dados_deputados()
 
     print('Atualizando base de dados fotos de cada deputado...')
-    gerar_base_dados_deputados_add_foto()
+    gerar_base_dados_deputados_add_foto_bytes()
     gerar_base_dados_deputados_add_foto_base64()
 
     print('Atualizando base de dados de despesas ...')

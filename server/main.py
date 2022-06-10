@@ -84,8 +84,8 @@ def deputado() -> Response:
     if id is None:
         
         deputado = consultar_banco_dados("SELECT identificacao.id, identificacao.nome, identificacao.partido, "
-                                        f"{'' if foto == '0' else 'identificacao.fotoBase64, '}"
-                                        "despesas.valor as despesa_mes FROM identificacao "
+                                        f"{'identificacao.fotoBase64, ' if foto == '1' else 'identificacao.url_foto, '}"
+                                        "identificacao.partido_uf, identificacao.email, despesas.valor as despesa_mes FROM identificacao "
                                         "INNER JOIN despesas ON despesas.id_deputado = identificacao.id "
                                         "WHERE identificacao.legislatura_atual=1 AND "
                                         "DATE(substr(despesas.data,7,4) "
@@ -105,8 +105,8 @@ def deputado() -> Response:
             return make_response(jsonify({'erro': 'Id não reconhecido'}), 400)
         
         deputado = consultar_banco_dados("SELECT identificacao.id, identificacao.nome, identificacao.partido, "
-                                        f"{'' if foto == '0' else 'identificacao.fotoBase64, '}"
-                                        "despesas.valor as despesa_mes FROM identificacao "
+                                        f"{'identificacao.fotoBase64, ' if foto == '1' else 'identificacao.url_foto, '}"
+                                        "identificacao.partido_uf, identificacao.email, despesas.valor as despesa_mes FROM identificacao "
                                         "INNER JOIN despesas ON despesas.id_deputado = identificacao.id "
                                         "WHERE identificacao.legislatura_atual=1 AND "
                                         f"identificacao.id = '{id}' AND "
