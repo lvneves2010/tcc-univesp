@@ -96,7 +96,7 @@ export default {
   },
   mounted () {
     axios
-      .get('http://35.237.79.225/deputado?limite=200')
+      .get('http://35.237.79.225/deputado?limite=600')
       .then(response => (this.newInfo = response.data.dados))
   }
 }
