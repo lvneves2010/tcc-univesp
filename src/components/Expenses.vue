@@ -7,42 +7,31 @@
             <p @click="expanded = true">Gastos mensais &nbsp; &nbsp; &nbsp;  <a><img src="../assets/baixo.png" alt="" width="10" height="10"></a></p>
         </div>
         <div v-if="expanded">
+            <ul id="example-1">
+                <li v-for="expense in expenseDetails" :key="expense"  class="unit">
+                     Valor total Mensal - {{ expense.data }}: R${{ expense.valor.toFixed(2) }} <br> 
+                </li>
+            </ul>
+            <p>Valor médio mensal: R$ {{ media[0].media.toFixed(2) }}</p>
+            <p>Valor Total: R$ {{ total[0].media.toFixed(2) }}</p>
             <p @click="expanded = false">Fechar</p>
         </div>
     </div>
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 export default {
   name: 'Expenses',
-  methods: {
-    selected(id) {
-      this.pressed = false;
-      axios.get(`https://dadosabertos.camara.leg.br/api/v2/deputados/${id}`).then(res => (
-        this.details = res.data.dados,
-        this.choosen = true
-      ));
-      axios.get(`https://dadosabertos.camara.leg.br/api/v2/deputados/${id}/despesas`).then(res => (
-        this.despesas = res.data.dados,
-        this.choosen = true
-      ));
-    }
+  props: {
+    expenseDetails: {},
+    media: null,
+    total: null,
   },
   data() {
       return {
-          pressed: true,
-          choosen: false,
-          infos: null,
-          details: null,
-          despesas: null,
           expanded: false
       }
-  },
-  mounted () {
-    axios
-      .get('https://dadosabertos.camara.leg.br/api/v2/deputados/')
-      .then(response => (this.infos = response.data.dados))
   }
 }
 </script>
@@ -54,5 +43,13 @@ p {
 }
 p:hover {
     color:blue;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+#individual_prop {
+  border: 0.5px solid #b0afaf;
+  margin: 1rem;
 }
 </style>

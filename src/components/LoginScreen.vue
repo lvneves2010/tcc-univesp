@@ -29,12 +29,12 @@ export default {
           infos: null,
           details: null
       }
-  },
-  mounted () {
-    axios
-      .get('https://dadosabertos.camara.leg.br/api/v2/deputados/')
-      .then(response => (this.infos = response.data.dados))
   }
+//   mounted () {
+//     axios
+//       .get('https://dadosabertos.camara.leg.br/api/v2/deputados/')
+//       .then(response => (this.infos = response.data.dados))
+//   }
 }
 </script>
 

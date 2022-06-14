@@ -7,42 +7,26 @@
             <p @click="expanded = true">Votações &nbsp; &nbsp; &nbsp;  <a><img src="../assets/baixo.png" alt="" width="10" height="10"></a></p>
         </div>
         <div v-if="expanded">
+            <ul id="example-1">
+                <li id="individual_prop" v-for="vote in votes" :key="vote"  class="unit">
+                     Tema: {{ vote.tema }} <br> Descrição: {{ vote.descricao }} <br><p v-if="vote.voto==0">Votou: Não</p> <p v-if="vote.voto==1">Votou: Sim</p> <br>
+                </li>
+            </ul>
             <p @click="expanded = false">Fechar</p>
         </div>
     </div>
 </template>
 
 <script>
-import axios from 'axios'
 export default {
   name: 'Votes',
-  methods: {
-    selected(id) {
-      this.pressed = false;
-      axios.get(`https://dadosabertos.camara.leg.br/api/v2/deputados/${id}`).then(res => (
-        this.details = res.data.dados,
-        this.choosen = true
-      ));
-      axios.get(`https://dadosabertos.camara.leg.br/api/v2/deputados/${id}/despesas`).then(res => (
-        this.despesas = res.data.dados,
-        this.choosen = true
-      ));
-    }
+  props: {
+    votes: {}
   },
   data() {
       return {
-          pressed: true,
-          choosen: false,
-          infos: null,
-          details: null,
-          despesas: null,
           expanded: false
       }
-  },
-  mounted () {
-    axios
-      .get('https://dadosabertos.camara.leg.br/api/v2/deputados/')
-      .then(response => (this.infos = response.data.dados))
   }
 }
 </script>
@@ -54,5 +38,13 @@ p {
 }
 p:hover {
     color:blue;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+#individual_prop {
+  border: 0.5px solid #b0afaf;
+  margin: 1rem;
 }
 </style>
