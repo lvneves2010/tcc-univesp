@@ -27,6 +27,7 @@
             <li class="tabs">
               <Expenses 
                 v-bind:expenseDetails="expenseDetails"
+                v-bind:expenseSet="expenseSet"
                 v-bind:media="media"
                 v-bind:total="total"/>
             </li>
@@ -65,6 +66,7 @@ export default {
       ))
       axios.get(`http://35.237.79.225/deputado/${id}/despesas/`).then(res => (
         this.expenseDetails = res.data.dados.despesas,
+        this.expenseSet.push((this.expenseDetails.map(e => parseInt(e.valor.toFixed(2))))),
         this.media = res.data.dados.media_despesas,
         this.total = res.data.dados.total_despesas,
         this.choosen = true
@@ -91,12 +93,13 @@ export default {
           votes: null,
           propositions: null,
           media: null,
-          total: null
+          total: null,
+          expenseSet: []
       }
   },
   mounted () {
     axios
-      .get('http://35.237.79.225/deputado?limite=600')
+      .get('http://35.237.79.225/deputado?limite=10')
       .then(response => (this.newInfo = response.data.dados))
   }
 }

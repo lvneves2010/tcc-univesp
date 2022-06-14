@@ -7,11 +7,13 @@
             <p @click="expanded = true">Gastos mensais &nbsp; &nbsp; &nbsp;  <a><img src="../assets/baixo.png" alt="" width="10" height="10"></a></p>
         </div>
         <div v-if="expanded">
-            <ul id="example-1">
+            <LineChart v-bind:expenseSet="expenseSet[0]"/>
+            <!-- <ul id="example-1">
                 <li v-for="expense in expenseDetails" :key="expense"  class="unit">
                      Valor total Mensal - {{ expense.data }}: R${{ expense.valor.toFixed(2) }} <br> 
                 </li>
             </ul>
+            <p>{{ expenseSet[0] }}</p> -->
             <p>Valor médio mensal: R$ {{ media[0].media.toFixed(2) }}</p>
             <p>Valor Total: R$ {{ total[0].media.toFixed(2) }}</p>
             <p @click="expanded = false">Fechar</p>
@@ -20,13 +22,15 @@
 </template>
 
 <script>
-// import axios from 'axios'
+import LineChart from './Line.vue'
 export default {
   name: 'Expenses',
+  components: { LineChart },
   props: {
     expenseDetails: {},
     media: null,
     total: null,
+    expenseSet: []
   },
   data() {
       return {
