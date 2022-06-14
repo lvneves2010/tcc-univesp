@@ -7,7 +7,7 @@
                 <img :src="info.url_foto" alt="" width="40" height="50">
               <button @click="newSelected(info.id)">
                 {{ info.nome }} ( {{ info.partido }} / {{ info.partido_uf}} ) <br>
-                Gastos ultimo Mês: R$ {{ info.despesa_mes }}
+                Gastos ultimo Mês: R$ {{ info.despesa_mes.toFixed(2) }}
               </button>
             </li>
           </ul>
