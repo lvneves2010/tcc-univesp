@@ -12,7 +12,7 @@
             </li>
           </ul>
         </div>
-        <button v-if="choosen" @click="pressed = true; choosen = false">voltar</button>
+        <button v-if="choosen" @click="pressed = true; choosen = false; expenseSet = []">voltar</button>
         <div v-if="choosen">
           <div  style="display: inline-flex">
             <div>
@@ -60,22 +60,22 @@ export default {
   methods: {
     newSelected(id) {
       this.pressed = false;
-      axios.get(`http://35.237.79.225/deputado?id=${id}`).then(res => (
+      axios.get(`https://tccunivesp.iaguaru.com.br/deputado?id=${id}`).then(res => (
         this.details = res.data.dados[0],
         this.choosen = true
       ))
-      axios.get(`http://35.237.79.225/deputado/${id}/despesas/`).then(res => (
+      axios.get(`https://tccunivesp.iaguaru.com.br/deputado/${id}/despesas/`).then(res => (
         this.expenseDetails = res.data.dados.despesas,
         this.expenseSet.push((this.expenseDetails.map(e => parseInt(e.valor.toFixed(2))))),
         this.media = res.data.dados.media_despesas,
         this.total = res.data.dados.total_despesas,
         this.choosen = true
       ))
-      axios.get(`http://35.237.79.225/deputado/${id}/proposicoes/`).then(res => (
+      axios.get(`https://tccunivesp.iaguaru.com.br/deputado/${id}/proposicoes/`).then(res => (
         this.propositions = res.data.dados,
         this.choosen = true
       ))
-      axios.get(`http://35.237.79.225/deputado/${id}/votacoes/`).then(res => (
+      axios.get(`https://tccunivesp.iaguaru.com.br/deputado/${id}/votacoes/`).then(res => (
         this.votes = res.data.dados,
         this.choosen = true
       ))
@@ -99,7 +99,7 @@ export default {
   },
   mounted () {
     axios
-      .get('http://35.237.79.225/deputado?limite=10')
+      .get('https://tccunivesp.iaguaru.com.br/deputado?limite=513')
       .then(response => (this.newInfo = response.data.dados))
   }
 }
