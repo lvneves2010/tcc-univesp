@@ -9,7 +9,7 @@
         <div v-if="expanded">
             <ul id="example-1">
                 <li id="individual_prop" v-for="vote in votes" :key="vote"  class="unit">
-                     Tema: {{ vote.tema }} <br> Descrição: {{ vote.descricao }} <br><p v-if="vote.voto==0">Votou: Não</p> <p v-if="vote.voto==1">Votou: Sim</p> <br>
+                    <b>  Tema: {{ vote.tema }} ({{ vote.siglaTipo}}.{{vote.numero}}) </b> <br> Descrição: {{ vote.descricao }} <br><p v-if="vote.voto==0">Votou: Não</p> <p v-if="vote.voto==1">Votou: Sim</p> <br>
                 </li>
             </ul>
             <p @click="expanded = false">Fechar</p>

@@ -9,7 +9,7 @@
         <div v-if="expanded">
             <ul>
                 <li id="individual_prop" v-for="proposition in propositions" :key="proposition"  class="unit">
-                    {{ proposition.ano }} <br> {{ proposition.ementa }} <br> {{ proposition.tema }}
+                   <b> {{ proposition.tema }} ({{ proposition.siglaTipo }}.{{ proposition.numero }}) </b> <br> {{ proposition.ano }} <br> {{ proposition.ementa }} 
                 </li>
             </ul>
             <p @click="expanded = false">Fechar</p>
