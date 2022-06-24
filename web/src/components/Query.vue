@@ -1,60 +1,41 @@
 <template>
     <div>
-        <button @click="pressed = true; choosen = false">inicio</button>
+        <!-- <button @click="pressed = true; choosen = false">inicio</button> -->
         <div v-if="pressed">
           <ul id="example-1">
-            <li v-for="info in infos" :key="info.id">
-                <img :src="info.urlFoto" alt="" width="35" height="50">
-              <button @click="selected(info.id)">
-                {{ info.nome }} - {{ info.siglaPartido }}
+            <li v-for="info in newInfo" :key="info.id" @click="newSelected(info.id)" class="unit">
+                <img :src="info.url_foto" alt="" width="40" height="50">
+              <button @click="newSelected(info.id)">
+                {{ info.nome }} ( {{ info.partido }} / {{ info.partido_uf}} ) <br>
+                Gastos ultimo Mês: R$ {{ info.despesa_mes.toFixed(2) }}
               </button>
             </li>
           </ul>
         </div>
+        <button v-if="choosen" @click="pressed = true; choosen = false; expenseSet = []">voltar</button>
         <div v-if="choosen">
-          <ul id="example-1" style="display: grid">
-            <li>
-              <img :src="details.ultimoStatus.urlFoto" alt="">
+          <div  style="display: inline-flex">
+            <div>
+              <img :src="details.url_foto" alt="" width="64" height="80">
+            </div>
+            <div>
+                <p >{{ details.nome }}</p>
+                <p>{{ details.partido }} / {{ details.partido_uf}} - {{ details.email }}</p>
+            </div>
+          </div>
+          <ul  style="display: grid" >
+            <li class="tabs">
+              <Expenses 
+                v-bind:expenseDetails="expenseDetails"
+                v-bind:expenseSet="expenseSet"
+                v-bind:media="media"
+                v-bind:total="total"/>
             </li>
-            <li >
-                Nome: {{ details.nomeCivil }}
+            <li class="tabs">
+              <Votes v-bind:votes="votes"/>
             </li>
-            <li >
-                Natural de: {{ details.municipioNascimento }} - {{ details.ufNascimento }}
-            </li>
-            <li >
-                Data de Nascimento: {{ details.dataNascimento }}
-            </li>
-            <li >
-                Escolaridade: {{ details.escolaridade }}
-            </li>
-            <li >
-                Situação: {{ details.ultimoStatus.situacao }}
-            </li>
-            <li >
-                Email: {{ details.ultimoStatus.email }}
-            </li>
-          </ul>
-          <ul id="example-1" >
-            <li >
-              <button>
-                Despesas
-              </button>
-            </li>
-            <li >
-              <button>
-                Orgãos
-              </button>
-            </li>
-            <li >
-              <button>
-                Frentes
-              </button>
-            </li>
-            <li >
-              <button>
-                Ocupações
-              </button>
+            <li class="tabs">
+              <Propositions v-bind:propositions="propositions"/>
             </li>
           </ul>
         </div>
@@ -63,32 +44,63 @@
 
 <script>
 import axios from 'axios'
+import Expenses from './Expenses.vue'
+import Votes from './Votes.vue'
+import Propositions from './Propositions.vue'
 export default {
   name: 'Query',
+  components: {
+    Expenses,
+    Votes,
+    Propositions
+  },
   props: {
     msg: String
   },
   methods: {
-    selected(id) {
+    newSelected(id) {
       this.pressed = false;
-      axios.get(`https://dadosabertos.camara.leg.br/api/v2/deputados/${id}`).then(res => (
-        this.details = res.data.dados,
+      axios.get(`https://tccunivesp.iaguaru.com.br/deputado?id=${id}`).then(res => (
+        this.details = res.data.dados[0],
+        this.choosen = true
+      ))
+      axios.get(`https://tccunivesp.iaguaru.com.br/deputado/${id}/despesas/`).then(res => (
+        this.expenseDetails = res.data.dados.despesas,
+        this.expenseSet.push((this.expenseDetails.map(e => parseInt(e.valor.toFixed(2))))),
+        this.media = res.data.dados.media_despesas,
+        this.total = res.data.dados.total_despesas,
+        this.choosen = true
+      ))
+      axios.get(`https://tccunivesp.iaguaru.com.br/deputado/${id}/proposicoes/`).then(res => (
+        this.propositions = res.data.dados,
+        this.choosen = true
+      ))
+      axios.get(`https://tccunivesp.iaguaru.com.br/deputado/${id}/votacoes/`).then(res => (
+        this.votes = res.data.dados,
         this.choosen = true
       ))
     }
   },
   data() {
       return {
-          pressed: false,
+          pressed: true,
           choosen: false,
           infos: null,
-          details: null
+          details: null,
+          despesas: null,
+          newInfo: null,
+          expenseDetails: null,
+          votes: null,
+          propositions: null,
+          media: null,
+          total: null,
+          expenseSet: []
       }
   },
   mounted () {
     axios
-      .get('https://dadosabertos.camara.leg.br/api/v2/deputados/')
-      .then(response => (this.infos = response.data.dados))
+      .get('https://tccunivesp.iaguaru.com.br/deputado?limite=513')
+      .then(response => (this.newInfo = response.data.dados))
   }
 }
 </script>
@@ -110,7 +122,19 @@ a {
   color: #42b983;
 }
 button {
-  color: #ffffff;
-  background-color: #2b2be4;
+  color: #000000;
+  background-color:#ffffff;
+  cursor: pointer;
+}
+.unit {
+  cursor: pointer;
+}
+img {
+  border: 0.5px solid #b0afaf;
+  border-radius: 50%;
+}
+.tabs {
+  border: 0.5px solid #b0afaf;
+  margin: 1rem;
 }
 </style>

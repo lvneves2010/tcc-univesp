@@ -1,25 +1,40 @@
 <template>
   <div id="app">
+    <div v-if="logged">
+      <a href="" @click="logged = false">Sair</a>
+    </div>
 
-    <Presentation msg=" Seja Bem Vindo"/>
-    <img alt="Hack" src="./assets/hackSM.png">
-    <img alt="Willy" src="./assets/willySM.png">
-    <img alt="Mumu" src="./assets/mumuSM.png">
-    <img alt="Leo" src="./assets/leoSM.png">
-    <Presentation msg="Esse é o nosso TCC"/>
-    <Query />
+    <Presentation msg=" APP UNIVESP "/>
+    <div v-if="logged">
+      <Query />
+    </div>
+    <div v-else>
+      <LoginScreen v-on:loggei="loggar" />
+    </div>
   </div>
 </template>
 
 <script>
 import Presentation from './components/Presentation.vue'
 import Query from './components/Query.vue'
+import LoginScreen from './components/LoginScreen.vue'
 
 export default {
   name: 'App',
   components: {
     Presentation,
-    Query
+    Query,
+    LoginScreen
+  },
+  data() {
+      return {
+          logged: false
+      }
+  },
+  methods: {
+    loggar() {
+      this.logged = true; 
+    }
   }
 }
 </script>
