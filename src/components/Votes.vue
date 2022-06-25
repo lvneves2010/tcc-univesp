@@ -9,7 +9,7 @@
         <div v-if="expanded">
             <ul id="example-1">
                 <li id="individual_prop" v-for="vote in votes" :key="vote"  class="unit">
-                    <b>  Tema: {{ vote.tema }} ({{ vote.siglaTipo}}.{{vote.numero}}) </b> <br> Descrição: {{ vote.descricao }} <br><p v-if="vote.voto==0">Votou: Não</p> <p v-if="vote.voto==1">Votou: Sim</p> <br>
+                    <b>  Tema: {{ vote.tema }} ({{ vote.siglaTipo}}.{{vote.numero}}) </b> <br> <br> Descrição: {{ vote.descricao }} <br><p v-if="vote.voto==0" style="color: #ff1d5e;">Votou: Não</p> <p v-if="vote.voto==1" style="color: green;">Votou: Sim</p>
                 </li>
             </ul>
             <p @click="expanded = false">Fechar</p>
@@ -33,12 +33,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/*
 p {
     cursor: pointer;
 }
 p:hover {
     color:blue;
 }
+*/
 ul {
   list-style-type: none;
   padding: 0;

@@ -2,10 +2,10 @@
     <div class="root">
         <div style="display: inline">
             <input placeholder="Digite seu email" />
-            <button @click="$emit('loggei')">entrar</button>
+            <button @click="$emit('loggei')">Entrar</button>
         </div>
 
-        <a @click="$emit('loggei')">Pular e entrar anonimo</a>
+        <button @click="$emit('loggei')">Pular e entrar anônimo</button>
     </div>
 </template>
 
@@ -52,9 +52,10 @@ input {
     min-width: 15rem;
 }
 button {
-    color: #ffffff;
-    background-color: #2b2be4;
-    cursor: pointer;
+  margin: 10px;
+  color: #ff1d5e;
+  background-color: #3c2747;
+  cursor: pointer;
 }
 .root {
     display:inline-grid;

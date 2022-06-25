@@ -14,8 +14,8 @@
                 </li>
             </ul>
             <p>{{ expenseSet[0] }}</p> -->
-            <p>Valor médio mensal: R$ {{ media[0].media.toFixed(2) }}</p>
-            <p>Valor Total: R$ {{ total[0].media.toFixed(2) }}</p>
+            <p>Valor médio mensal: R$ {{ media[0].media.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits:2}) }}</p>
+            <p>Valor Total: R$ {{ total[0].media.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits:2}) }}</p>
             <p @click="expanded = false">Fechar</p>
         </div>
     </div>
@@ -42,12 +42,15 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/*
 p {
     cursor: pointer;
 }
+
 p:hover {
     color:blue;
 }
+*/
 ul {
   list-style-type: none;
   padding: 0;
