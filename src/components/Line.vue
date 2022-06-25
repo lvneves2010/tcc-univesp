@@ -71,16 +71,40 @@ export default {
   data() {
     return {
       chartData: {
-        labels: [ 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', "Jun" ],
+        labels: [ 'Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
         datasets: [ {
             label: 'gastos mensais',
-            backgroundColor: '#f87979',
+            backgroundColor: '#FFFFFF',
+            borderColor:'#EDB64C', 
             data: this.expenseSet }
         ]
       },
       chartOptions: {
+        plugins: {
+            legend: {
+                display: false
+            },
+        },
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        scales: {
+              y: {
+                  grid: {
+                    color: '#685D6E'
+                  },
+                  ticks: {
+                      color: '#FFFFFF'
+                    }
+              },
+              x: {
+                    grid: {
+                      color: '#685D6E'
+                    },
+                          ticks: {
+                      color: '#FFFFFF'
+                    }
+              }
+        }
       }
     }
   }

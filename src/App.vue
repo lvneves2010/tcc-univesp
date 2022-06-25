@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div v-if="logged">
-      <a href="" @click="logged = false">Sair</a>
+      <button @click="logged = false">Sair</button>
     </div>
 
     <Presentation msg=" APP UNIVESP "/>
@@ -45,7 +45,19 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: white;
   margin-top: 60px;
+  background-color: #3c2747;
 }
+
+body {
+  background-color: #3c2747;
+}
+
+button {
+  color: #ff1d5e;
+  background-color: #3c2747;
+  cursor: pointer;
+}
+
 </style>

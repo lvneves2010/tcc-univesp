@@ -9,7 +9,7 @@
         <div v-if="expanded">
             <ul>
                 <li id="individual_prop" v-for="proposition in propositions" :key="proposition"  class="unit">
-                   <b> {{ proposition.tema }} ({{ proposition.siglaTipo }}.{{ proposition.numero }}) </b> <br> {{ proposition.ano }} <br> {{ proposition.ementa }} 
+                   <b> {{ proposition.tema }} ({{ proposition.siglaTipo }}.{{ proposition.numero }} / {{ proposition.ano }}) </b> <br> <br> {{ proposition.ementa }} 
                 </li>
             </ul>
             <p @click="expanded = false">Fechar</p>
@@ -20,7 +20,7 @@
 <script>
 export default {
   name: 'Propositions',
-  props: {
+  props: {  
     propositions: {}
   },
   data() {
@@ -33,12 +33,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/*
 p {
     cursor: pointer;
 }
 p:hover {
     color:blue;
 }
+*/
 ul {
   list-style-type: none;
   padding: 0;
